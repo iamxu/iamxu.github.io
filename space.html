@@ -4,9 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body align="center">
-<p id="p2" style="display:none"> </p>
-<button onclick="copyToClipboard('#p2')" class="btn btn-default" style="min-height:100px">COPY TO CLIPBOARD</button>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<p id="ppp" style="display:none"> </p><a class="duc" onclick="copyToClipboard('#ppp');innerHTML = 'ĐÃ COPY';">CLICK HERE COPY</a><p></p>
+<style>
+ a { color: #00c;font-size:20px;
+   border:2px solid blue ;
+  padding:10px;display:block
+  }
+a:hover { color:red;border:2px solid red }
+a:focus { color:green; }
+
+</style>
+
+
 <script>
 function copyToClipboard(element) {
   var $temp = $("<input>");
@@ -15,7 +24,9 @@ function copyToClipboard(element) {
   document.execCommand("copy");
   $temp.remove();
 }
-
 </script>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </body>
 </html>
