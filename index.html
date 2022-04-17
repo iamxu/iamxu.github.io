@@ -1,1 +1,228 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Free NFT File Upload">
+<meta property="og:site_name" content="Free NFT File Upload">
+<meta name="theme-color" content="#22292F">
+<meta name="robots" content="index,follow">
+<meta name="googlebot" content="index,follow">
+<meta name="google" content="notranslate">
+<meta name="format-detection" content="telephone=no">
+<title>Free NFT File Upload</title>
+<script src="/cdn-cgi/apps/head/AbPg7WTTVqxi9UeiQ0TpTLmw1m0.js"></script><link rel="shortcut icon" href="https://i.imgur.com/5iXHxAB.png" />
+<link rel="stylesheet" href="https://cloudflare-ipfs.com/ipfs/bafkreibe7zo3ldc6ajlzmtfyalhexyt7ieqeedpl6r3ug3gyixb5vljpsq?filename=style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.7.0/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.1.1/validator.min.js"></script>
+</head>
+<body>
+<div class="menu" style="text-align: center; padding: 15px;">
+    <a href="/">
+    <img src="https://i.imgur.com/5iXHxAB.png" /></a>
+    <br />Free NFT File Upload
+</div>
+<div class="menu" style="text-align:center;">
+    <form id="form" method="post" action="">
+        <div style="margin: 5px;" id="dai"></div>
+        <input id="uploadfile" type="file" name="file" /> <br />
+        <input type="button" id="btnUpload" style="margin: 1%;; padding: 12px 25px; font-size: 16px;" class="button" value="Upload" onclick="frUpload()">
+        <br />
+    </form>
+</div>
+<div class="phdr"><i class="fa fa-circle-o-notch fa-spin fa-fw"></i>Danh sách file</div>
+<div id="dataSection"></div>
+<div id="no-data" class="menu" align="center">
+    <i class="fa fa-spin fa-spinner" aria-hidden="true"></i>
+</div>
+<div class="topmenu" align="center" id="paginationSection"></div>
+<script>
+    var pageID = 1;
+    var totalData = 1;
+    var dataList;
+    var dataRead = 'https://docs.google.com/spreadsheets/d/1EOyJpy9wQlmY9xIaZHDR4qHqe1nKPrShmcKdVc3xv_0';
+    var dataPost = 'https://docs.google.com/forms/d/e/1mwMbinrr2rrW7RaRe5KjxW2LfPNinSpOP4T43GGXK7g';
+    var dataPost_filename = 'entry.1494421710';
+    var dataPost_filesize = 'entry.1239300109';
+    var dataPost_cid = 'entry.1950466046';
+    var dataPost_passphrase = 'entry.1285938063';
+    var apiNFT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEIwNjM4YzdmNTBCOGVDODA3OGU3MjZkRWI4NDcxMjNmNjBFYzBGMzUiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1MDE3MTYzMzA0MiwibmFtZSI6ImR1Y2R1Y2F0aSJ9.9TX5-zdx3_5U0A82seHrq-dFlkH66pljP9WOChiH8Cs';
+
+    function getFileExtensionIcon(e){return"jpg"===(e=e.toLowerCase().trim())||"png"===e||"jpeg"===e||"webp"===e||"gif"===e||"psd"===e||"heic"===e?"file-image-o":"mp4"===e||"mkv"===e||"webm"===e||"flv"===e||"3gp"===e?"file-video-o":"mp3"===e||"mkv"===e||"m4a"===e||"flac"===e||"wav"===e?"file-audio-o":"docx"===e||"doc"===e||"txt"===e||"md"===e||"odt"===e||"txt"===e||"md"===e?"file-text-o":"docx"===e||"doc"===e||"odt"===e?"file-word-o":"xls"===e||"xlsx"===e?"file-excel-o":"ppt"===e||"pptx"===e?"file-powerpoint-o":"pdf"===e?"file-pdf-o":"zip"===e||"rar"===e||"7z"===e||"tar"===e?"file-archive-o":"cpp"===e||"cs"===e||"php"===e||"html"===e||"js"===e||"py"===e?"file-code-o":"sql"===e?"database":"file-o"}
+    function getCTime(){var e=new Date;return e.getDate()+"-"+(e.getMonth()+1)+"-"+e.getFullYear()+" "+(e.getHours()+":"+e.getMinutes()+":"+e.getSeconds())}
+    function getQueryVariable(r){for(var t=window.location.search.substring(1).split("&"),i=0;i<t.length;i++){var n=t[i].split("=");if(n[0]==r)return n[1]}return!1}
+    function updatePageURL(pageID) {
+        if (history.pushState) {
+            var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?page=' +pageID;
+            window.history.pushState({path:newurl},'',newurl);
+        }
+    }
+
+    function paginationData(totalData,pageID){
+        var tongPage = 1;
+        if (totalData % 10 > 0)	{tongPage = Math.floor(totalData / 10) + 1;}
+        else {tongPage = Math.floor(totalData / 10);}
+        $("#paginationSection").empty();
+        var pageIDm1=pageID-1; var pageIDm2=pageID-2; var pageIDp1=Number(pageID)+1; var pageIDp2=Number(pageID)+2;
+        if (pageID > 1) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDm1+')" >«</a>');
+        }
+        if (pageID > 3) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+',1)" >1</a>');
+        }
+        if (pageID > 4) {
+            $('#paginationSection').append('...');
+        }
+        if (pageID > 2) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDm2+')" >'+pageIDm2+'</a>');
+        }
+        if (pageID > 1) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDm1+')" >'+pageIDm1+'</a>');
+        }
+        $('#paginationSection').append('<span class="currentpage"><b>' + pageID + '</b></span>');
+        if (pageID < tongPage - 1) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDp1+')" >'+pageIDp1+'</a>');
+        }
+        if (pageID < tongPage - 2) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDp2+ ') ">'+pageIDp2+'</a>');
+        }
+        if (pageID < tongPage - 3)
+            $('#paginationSection').append('...');
+        if (pageID < tongPage) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+tongPage+')" >'+tongPage+'</a>');
+        }
+        if (pageID < tongPage) {
+            $('#paginationSection').append('<a class="pagenav" onclick="getData(' + totalData+','+pageIDp1+')" >»</a>');
+        }
+        $('#paginationSection').append('<br/><input type="number" id="ano" name="page" min="1" max="' + tongPage + '"><input type="button" onclick="getPage(' + totalData+')" class="pagenav" value="Go">');
+    }
+
+    function getPage(totalData){getData(totalData,$("#ano").val());}
+    function getDataElementHTML(e){return '<div class="list1 efile"><a href="/view.html?cid='+e.cid+'"><i class="fa fa-'+getFileExtensionIcon(e.filename.split(".").pop())+'" aria-hidden="true"></i> '+e.filename+'</a></div>'}
+
+    function displayData(data) {
+        data = `timestamp,filename,filesize,cid,passphrase\n${data}`;
+        dataList = $.csv.toObjects(data);
+        dataList.reverse();
+        dataList.splice(-1);
+        if (getQueryVariable("page")) {pageID = getQueryVariable("page");}
+        totalData = dataList.length;
+        getData(totalData, pageID);
+    }
+
+    function getData(totalData, pageID) {
+        $("#dataSection").html("");
+        document.getElementById('dataSection').scrollIntoView();
+        updatePageURL(pageID);
+        var dauD = (pageID - 1) * 10;
+        var cuoiD = pageID * 10 - 1;
+        var demTT = dauD;
+        var i;
+        paginationData(totalData,pageID);
+        for (i = dauD; i <= cuoiD; i++) {
+            if (demTT >= totalData) {break;}
+            demTT++;
+            var newItem = getDataElementHTML(dataList[i]);
+            $("#dataSection").append(newItem);
+            $("#no-data").hide();
+        };
+    }
+
+    function loadData() {
+        var sqlStatement = encodeURIComponent(`SELECT A, B, C, D, E`)
+        fetch(`${dataRead}/gviz/tq?tqx=out:csv&sheet=data&tq=${sqlStatement}&headers=0`)
+            .then(response => response.text())
+            .then(response =>
+                displayData(response)
+            )
+    }
+
+    loadData();
+
+    function createRandomString(n){return(Math.random()+1).toString(36).substring(n)}
+    function readfile(n){return new Promise((e,r)=>{var a=new FileReader;a.onload=()=>{e(a.result)},a.readAsArrayBuffer(n)})}
+    async function frUpload() {
+        const form = document.getElementById("form");const file = form.file.files[0];
+        if (file == null) {alert("Vui lòng chọn file!");return;};
+        if (file.size > 100000000) {alert("File lớn hơn mức cho phép!");this.value = "";return;};
+        document.getElementById('btnUpload').style.visibility = "hidden";
+
+        var d1 = document.getElementById('dai');
+        d1.insertAdjacentHTML('beforeend', '<img src="https://i.imgur.com/1TyFaOM.gif" />');
+
+        const encpassphrase = createRandomString(2) +  createRandomString(2);
+        console.log(encpassphrase);
+        var plaintextbytes = await readfile(file).catch(function (err) {console.error(err);});
+        var plaintextbytes = new Uint8Array(plaintextbytes);var pbkdf2iterations = 10000;var passphrasebytes = new TextEncoder("utf-8").encode(encpassphrase);var pbkdf2salt = window.crypto.getRandomValues(new Uint8Array(8));
+        var passphrasekey = await window.crypto.subtle.importKey('raw', passphrasebytes, {name: 'PBKDF2'}, false, ['deriveBits']).catch(function (err) {console.error(err);});
+        var pbkdf2bytes = await window.crypto.subtle.deriveBits({"name": 'PBKDF2',"salt": pbkdf2salt,"iterations": pbkdf2iterations,"hash": 'SHA-256'}, passphrasekey, 384).catch(function (err) {console.error(err);}); pbkdf2bytes = new Uint8Array(pbkdf2bytes);keybytes = pbkdf2bytes.slice(0, 32);ivbytes = pbkdf2bytes.slice(32);var key = await window.crypto.subtle.importKey('raw', keybytes, {name: 'AES-CBC',length: 256}, false, ['encrypt']).catch(function (err) {console.error(err);});var cipherbytes = await window.crypto.subtle.encrypt({name: "AES-CBC",iv: ivbytes}, key, plaintextbytes).catch(function (err) {console.error(err);});if (!cipherbytes) {console.log('Error encrypting file.  See console log.');return;}console.log('plaintext encrypted');cipherbytes = new Uint8Array(cipherbytes);var resultbytes = new Uint8Array(cipherbytes.length + 16)
+        resultbytes.set(new TextEncoder("utf-8").encode('Salted__'));resultbytes.set(pbkdf2salt, 8);resultbytes.set(cipherbytes, 16);
+        var blob = new Blob([resultbytes], {type: 'application/download'});
+
+        fetch("https://api.nft.storage/upload", {
+            method: "post",
+            headers: {
+                Authorization: "Bearer " + apiNFT
+            },
+            body: blob
+        }).then(data => data.json()).then(data => {
+            console.log(data.value.cid);
+            postData(file.name, file.size,data.value.cid,encpassphrase);
+        })
+
+    }
+
+    const encodeFormData = (data) => {return Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&');}
+
+    function postData(filename, filesize,cid,passphrase) {
+        var bodyForm = {};
+        bodyForm[dataPost_filename] = filename;
+        bodyForm[dataPost_filesize] = filesize;
+        bodyForm[dataPost_cid] = cid;
+        bodyForm[dataPost_passphrase] = passphrase;
+
+        var objFile = {};
+        objFile["filename"] = filename;
+        objFile["filesize"] = filesize;
+        objFile["cid"] = cid;
+        objFile["passphrase"] = passphrase;
+        objFile["timestamp"] = getCTime();
+        console.log(objFile);
+
+        fetch(`${dataPost}/formResponse`, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: encodeFormData(bodyForm)
+            }).then(response => {
+                document.getElementById("uploadfile").value = "";
+                document.getElementById("dai").innerHTML=""
+                document.getElementById('btnUpload').style.visibility = "visible";
+                if(totalData > 10){$('#dataSection .efile:last').remove();}
+                dataList.reverse();
+                dataList.push(objFile);
+                dataList.reverse();
+                totalData++;
+                paginationData(totalData,pageID);
+                var newItem = getDataElementHTML(objFile);
+                $("#dataSection").prepend(newItem);
+
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        return false;
+    }
+
+</script>
+<div style="background: #3D4852;border:solid #e9e9e9;border-width:0 1px 1px;padding:5px;text-align: center;color:#fff;">
+    <i class="fa fa-copyright"></i> <span id="year"></span> <br />
+</div>
+<script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>
+</html>
