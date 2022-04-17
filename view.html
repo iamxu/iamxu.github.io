@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Lưu trữ file">
+<meta property="og:site_name" content="Xu">
+<meta name="theme-color" content="#22292F">
+<meta name="robots" content="index,follow">
+<meta name="googlebot" content="index,follow">
+<meta name="google" content="notranslate">
+<meta name="format-detection" content="telephone=no">
+<title id="tname">Free NFT File Upload</title>
+<script src="/cdn-cgi/apps/head/AbPg7WTTVqxi9UeiQ0TpTLmw1m0.js"></script><link rel="shortcut icon" href="https://i.imgur.com/5iXHxAB.png" />
+<link rel="stylesheet" href="https://cloudflare-ipfs.com/ipfs/bafkreibe7zo3ldc6ajlzmtfyalhexyt7ieqeedpl6r3ug3gyixb5vljpsq?filename=style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.7.0/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.1.1/validator.min.js"></script>
+</head>
+<body>
+<div class="menu" style="text-align: center; padding: 15px;">
+    <a href="/"><img src="https://i.imgur.com/5iXHxAB.png" /></a><br />Free NFT File Upload
+</div>
+
+
+
+
+
+
+<div class="phdr"><i class="fa fa-file-video-o" aria-hidden="true"></i> <span id="fname"></span> </div>
+<div class="menu">
+    <center>
+        <div style="margin: 5px;" id="dai"></div>
+        <div id="fPreview" style="padding: 15px; max-width: 500px; visibility: hidden;"></div>
+        <p>
+            <i class="fa fa-info-circle" aria-hidden="true"></i> <span id="fsize"></span>  - 
+            <i class="fa fa-clock-o" aria-hidden="true"></i> <span id="ftime"></span><br/>
+        </p>
+        <div id="listButton"></div>
+        <br /> <br />
+    </center>
+</div>
+
+
+
+
+<script>
+    var dataRead = 'https://docs.google.com/spreadsheets/d/1EOyJpy9wQlmY9xIaZHDR4qHqe1nKPrShmcKdVc3xv_0';
+    var dataList;
+    var dataItem;
+    function getFileExtensionIcon(e){return"jpg"===(e=e.toLowerCase().trim())||"png"===e||"jpeg"===e||"webp"===e||"gif"===e||"psd"===e||"heic"===e?"file-image-o":"mp4"===e||"mkv"===e||"webm"===e||"flv"===e||"3gp"===e?"file-video-o":"mp3"===e||"mkv"===e||"m4a"===e||"flac"===e||"wav"===e?"file-audio-o":"docx"===e||"doc"===e||"txt"===e||"md"===e||"odt"===e||"txt"===e||"md"===e?"file-text-o":"docx"===e||"doc"===e||"odt"===e?"file-word-o":"xls"===e||"xlsx"===e?"file-excel-o":"ppt"===e||"pptx"===e?"file-powerpoint-o":"pdf"===e?"file-pdf-o":"zip"===e||"rar"===e||"7z"===e||"tar"===e?"file-archive-o":"cpp"===e||"cs"===e||"php"===e||"html"===e||"js"===e||"py"===e?"file-code-o":"sql"===e?"database":"file-o"}
+    function humanFileSize(o){var t=Math.floor(Math.log(o)/Math.log(1024));return+(o/Math.pow(1024,t)).toFixed(2)+" "+["B","kB","MB","GB","TB"][t]}
+    function getData(data) {
+        data = `timestamp,filename,filesize,cid,passphrase\n${data}`;
+        dataList = $.csv.toObjects(data);let obj = dataList.find(o => o.cid === Wcid); return obj;
+    }
+    function getQueryVariable(r){for(var t=window.location.search.substring(1).split("&"),i=0;i<t.length;i++){var n=t[i].split("=");if(n[0]==r)return n[1]}return!1}
+    var Wcid = getQueryVariable("cid");
+    function loadData() {
+        var sqlStatement = encodeURIComponent(`SELECT A, B, C, D, E`)
+        fetch(`${dataRead}/gviz/tq?tqx=out:csv&sheet=data&tq=${sqlStatement}&headers=0`)
+            .then(response => response.text())
+            .then(response => {
+                dataItem = getData(response);
+                document.getElementById("fname").innerHTML = dataItem.filename;
+		document.getElementById("tname").innerHTML = dataItem.filename;
+                document.getElementById("fsize").innerHTML = humanFileSize(dataItem.filesize);
+                document.getElementById("ftime").innerHTML = dataItem.timestamp;
+                if (getFileExtensionIcon(dataItem.filename.split(".").pop()) =="file-image-o")
+                {
+                    $("#fPreview").append('<img id="ipreview" style="max-width: 100%;border-style: dashed;" width="400" src="" />');
+                    $("#listButton").append('<button style="margin: 5px; padding: 12px 25px; font-size: 16px;" onclick="previewImg(\''+dataItem.filename+'\', \''+dataItem.cid+'\', \''+dataItem.passphrase+'\')"><b><i class="fa fa-picture-o"></i> Preview</b></button>');
+                }
+                if (getFileExtensionIcon(dataItem.filename.split(".").pop()) == "file-video-o" || getFileExtensionIcon(dataItem.filename.split(".").pop()) == "file-audio-o")
+                {
+                    $("#fPreview").append('<video style="max-width: 100%;"  width="400" controls><source src="" type="video/mp4"></video>');
+                    $("#listButton").append('<button style="margin: 5px; padding: 12px 25px; font-size: 16px;" onclick="previewVideoURL(\''+dataItem.filename+'\', \''+dataItem.cid+'\', \''+dataItem.passphrase+'\')"><b><i class="fa fa-play-circle"></i> Preview</b></button>');
+                }
+                $("#listButton").append('<button style="margin: 5px; padding: 12px 25px; font-size: 16px;" onclick="downloadURL(\''+dataItem.filename+'\', \''+dataItem.cid+'\', \''+dataItem.passphrase+'\')"><b><i class="fa fa-download"></i> Download</b></button>');
+                }
+            )
+    }
+    function readfile(n){return new Promise((e,t)=>{var o=new FileReader;o.onload=()=>{e(o.result)},o.readAsArrayBuffer(n)})}async function decryptfile(e,t,o){var n=await readfile(e).catch(function(e){console.error(e)}),r=new Uint8Array(n),e=new TextEncoder("utf-8").encode(o),n=r.slice(8,16),e=await window.crypto.subtle.importKey("raw",e,{name:"PBKDF2"},!1,["deriveBits"]).catch(function(e){console.error(e)});console.log("passphrasekey imported");e=await window.crypto.subtle.deriveBits({name:"PBKDF2",salt:n,iterations:1e4,hash:"SHA-256"},e,384).catch(function(e){console.error(e)});console.log("pbkdf2bytes derived"),e=new Uint8Array(e),keybytes=e.slice(0,32),ivbytes=e.slice(32),r=r.slice(16);e=await window.crypto.subtle.importKey("raw",keybytes,{name:"AES-CBC",length:256},!1,["decrypt"]).catch(function(e){console.error(e)});console.log("key imported");r=await window.crypto.subtle.decrypt({name:"AES-CBC",iv:ivbytes},e,r).catch(function(e){console.error(e)});console.log("ciphertext decrypted"),r=new Uint8Array(r);r=new Blob([r],{type:"application/download"});console.log(t),console.log(o);const c=document.createElement("a");c.href=URL.createObjectURL(r),c.download=t,c.click()}async function downloadURL(t,e,o){document.getElementById("dai").insertAdjacentHTML("beforeend",'<img src="https://i.imgur.com/1TyFaOM.gif" />'),fetch("https://cloudflare-ipfs.com/ipfs/"+e).then(e=>e.blob()).then(e=>{decryptfile(e,t,o),document.getElementById("dai").innerHTML=""}).catch(console.error)}
+    async function decryptfileVideo(e,t,o){var i=await readfile(e).catch(function(e){console.error(e)}),c=new Uint8Array(i),e=new TextEncoder("utf-8").encode(o),i=c.slice(8,16),e=await window.crypto.subtle.importKey("raw",e,{name:"PBKDF2"},!1,["deriveBits"]).catch(function(e){console.error(e)});console.log("passphrasekey imported");e=await window.crypto.subtle.deriveBits({name:"PBKDF2",salt:i,iterations:1e4,hash:"SHA-256"},e,384).catch(function(e){console.error(e)});console.log("pbkdf2bytes derived"),e=new Uint8Array(e),keybytes=e.slice(0,32),ivbytes=e.slice(32),c=c.slice(16);e=await window.crypto.subtle.importKey("raw",keybytes,{name:"AES-CBC",length:256},!1,["decrypt"]).catch(function(e){console.error(e)});console.log("key imported");c=await window.crypto.subtle.decrypt({name:"AES-CBC",iv:ivbytes},e,c).catch(function(e){console.error(e)});console.log("ciphertext decrypted"),c=new Uint8Array(c);c=new Blob([c],{type:"application/download"});console.log(t),console.log(o);o=document.querySelector("video"),c=window.URL.createObjectURL(c);o.src=c,o.style.visibility="visible"}async function previewVideoURL(t,e,o){document.getElementById("dai").insertAdjacentHTML("beforeend",'<img src="https://i.imgur.com/1TyFaOM.gif" />'),fetch("https://cloudflare-ipfs.com/ipfs/"+e).then(e=>e.blob()).then(e=>{decryptfileVideo(e,t,o),document.getElementById("dai").innerHTML=""}).catch(console.error)}
+    async function decryptfileImg(e,t,o){var n=await readfile(e).catch(function(e){console.error(e)}),c=new Uint8Array(n),e=new TextEncoder("utf-8").encode(o),n=c.slice(8,16),e=await window.crypto.subtle.importKey("raw",e,{name:"PBKDF2"},!1,["deriveBits"]).catch(function(e){console.error(e)});console.log("passphrasekey imported");e=await window.crypto.subtle.deriveBits({name:"PBKDF2",salt:n,iterations:1e4,hash:"SHA-256"},e,384).catch(function(e){console.error(e)});console.log("pbkdf2bytes derived"),e=new Uint8Array(e),keybytes=e.slice(0,32),ivbytes=e.slice(32),c=c.slice(16);e=await window.crypto.subtle.importKey("raw",keybytes,{name:"AES-CBC",length:256},!1,["decrypt"]).catch(function(e){console.error(e)});console.log("key imported");c=await window.crypto.subtle.decrypt({name:"AES-CBC",iv:ivbytes},e,c).catch(function(e){console.error(e)});console.log("ciphertext decrypted"),c=new Uint8Array(c);c=new Blob([c],{type:"application/download"});console.log(t),console.log(o);o=document.getElementById("ipreview"),c=window.URL.createObjectURL(c);o.src=c,o.style.visibility="visible"}async function previewImg(t,e,o){document.getElementById("dai").insertAdjacentHTML("beforeend",'<img src="https://i.imgur.com/1TyFaOM.gif" />'),fetch("https://cloudflare-ipfs.com/ipfs/"+e).then(e=>e.blob()).then(e=>{decryptfileImg(e,t,o),document.getElementById("dai").innerHTML=""}).catch(console.error)}
+    loadData();
+</script>
+<div style="background: #3D4852;border:solid #e9e9e9;border-width:0 1px 1px;padding:5px;text-align: center;color:#fff;">
+    <i class="fa fa-copyright"></i> <span id="year"></span> <br />
+</div>
+<script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>
+</html>
